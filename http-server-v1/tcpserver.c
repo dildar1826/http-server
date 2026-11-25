@@ -4,13 +4,16 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-int main() { 
+int main() {
   char buffer[1024] = {0};
-  
+
   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-  if (sockfd < 0)
+  if (sockfd < 0) {
+
     printf("Failed to open a scoekt...");
+    exit(1);
+  }
   struct sockaddr_in address = {0};
 
   address.sin_family = AF_INET;
@@ -22,7 +25,7 @@ int main() {
     close(sockfd);
     exit(1);
   }
- 
+
   printf("Socket successfully bound to port.");
 
   if (listen(sockfd, 5) < 0) {
@@ -41,32 +44,27 @@ int main() {
 
     if (clientfd < 0) {
       perror("Failed to accept connection..");
-      close(sockfd);
       continue;
     }
 
-    ssize_t bytes_received = recv(clientfd, buffer, sizeof(buffer) -1, 0);
-    if (bytes_received < 0){
+    ssize_t bytes_received = recv(clientfd, buffer, sizeof(buffer) - 1, 0);
+    if (bytes_received < 0) {
       perror("Receive Failed.");
-    }
-    else if (bytes_received == 0) {
+    } else if (bytes_received == 0) {
       printf("Client Disconnected.");
-    }
-    else {
+    } else {
       printf("Received %zd bytes: \n %s\n", bytes_received, buffer);
 
-      const char response [] = 
-          "HTTP/1.1 200 OK\r\n"
-          "Content-Type: text/plain\r\n"
-          "Content-Length: 13 \r\n"
-          "\r\n"
-          "Hello, world!";
+      const char response[] = "HTTP/1.1 200 OK\r\n"
+                              "Content-Type: text/plain\r\n"
+                              "Content-Length: 13 \r\n"
+                              "\r\n"
+                              "Hello, world!";
       ssize_t sent = send(clientfd, response, sizeof(response) - 1, 0);
 
-      if(sent < 0){
-      perror("Send failed");
+      if (sent < 0) {
+        perror("Send failed");
       }
-      
     }
     close(clientfd);
   }

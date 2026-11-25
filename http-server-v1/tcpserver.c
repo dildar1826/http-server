@@ -4,7 +4,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <string.h>
 int main() { 
   char buffer[1024] = {0};
   
@@ -55,9 +54,22 @@ int main() {
     }
     else {
       printf("Received %zd bytes: \n %s\n", bytes_received, buffer);
-    }
 
+      const char response [] = 
+          "HTTP/1.1 200 OK\r\n"
+          "Content-Type: text/plain\r\n"
+          "Content-Length: 13 \r\n"
+          "\r\n"
+          "Hello, world!";
+      ssize_t sent = send(clientfd, response, sizeof(response) - 1, 0);
+
+      if(sent < 0){
+      perror("Send failed");
+      }
+      
+    }
     close(clientfd);
   }
   close(sockfd);
+  return 0;
 }
